@@ -158,46 +158,72 @@
             margin-bottom: 20px;
             text-align: center;
         }
-        .gpio-pins {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+        .pin-visualization-container {
+            position: relative;
             max-width: 800px;
             margin: 0 auto;
         }
-        .pin-row {
-            display: flex;
-            gap: 10px;
+        .raspberry-pi-image {
+            position: relative;
+            width: 100%;
         }
-        .pin {
-            width: 40px;
-            height: 40px;
+        .raspberry-pi-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .gpio-pins-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .pin-overlay {
+            position: absolute;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
+            background-color: #bdc3c7;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #bdc3c7;
-            color: white;
-            font-weight: bold;
-            margin-right: 5px;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            transition: transform 0.2s;
         }
-        .pin.active {
+        .pin-overlay:hover {
+            transform: scale(1.2);
+            z-index: 20;
+        }
+        .pin-overlay.active {
             background-color: #e74c3c;
             animation: pulse 2s infinite;
         }
-        .pin.motor-pin {
+        .pin-overlay.motor-pin {
             background-color: #3498db;
         }
-        .pin-info-text {
+        .pin-tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
             font-size: 12px;
-            color: #666;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            max-width: 200px;
+            z-index: 30;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
-        .pin-info-text .pin-number {
-            font-weight: bold;
+        .pin-tooltip.visible {
+            opacity: 1;
         }
         .pin-legend {
             display: flex;
@@ -225,12 +251,8 @@
             background-color: #e74c3c;
             animation: pulse 2s infinite;
         }
-        .debug-info {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            font-family: monospace;
+        .gpio-pins-list {
+            display: none;
         }
         .status-msg {
             margin-top: 10px;
@@ -253,13 +275,42 @@
         @keyframes pulse {
             0% {
                 box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+                transform: scale(1);
             }
-            70% {
-                box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+            50% {
+                box-shadow: 0 0 0 8px rgba(231, 76, 60, 0);
+                transform: scale(1.2);
             }
             100% {
                 box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+                transform: scale(1);
             }
+        }
+        
+        /* Highlight effect when selecting pins */
+        @keyframes highlight {
+            0% { 
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+            }
+            70% { 
+                box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+            }
+            100% { 
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+            }
+        }
+        
+        /* Add glow effect to motor pins */
+        .pin-overlay.motor-pin {
+            background-color: #3498db;
+            box-shadow: 0 0 5px 2px rgba(52, 152, 219, 0.5);
+        }
+        
+        /* Add stronger pulse animation to active pins */
+        .pin-overlay.active {
+            background-color: #e74c3c;
+            animation: pulse 2s infinite;
+            z-index: 20;
         }
         
         /* Modal styles for pin editing */
@@ -414,22 +465,33 @@
         
         <div class="pi-visualization">
             <h2>GPIO Pin Visualization</h2>
-            <div class="gpio-pins" id="gpio-pins">
-                <!-- GPIO pins will be populated by JavaScript -->
+            <div class="pin-visualization-container">
+                <div class="raspberry-pi-image">
+                    <img src="https://cdn-shop.adafruit.com/970x728/3400-05.jpg" alt="Raspberry Pi Zero">
+                    <div id="gpio-pins-overlay" class="gpio-pins-overlay">
+                        <!-- GPIO pins will be dynamically added here -->
+                    </div>
+                </div>
+                <div class="pin-legend">
+                    <div class="legend-item">
+                        <div class="legend-color inactive"></div>
+                        <span>Inactive</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color motor"></div>
+                        <span>Motor Control</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color active"></div>
+                        <span>Active</span>
+                    </div>
+                </div>
+                <div class="pin-tooltip" id="pin-tooltip">
+                    <!-- Pin information will appear here on hover -->
+                </div>
             </div>
-            <div class="pin-legend">
-                <div class="legend-item">
-                    <div class="legend-color inactive"></div>
-                    <span>Inactive</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color motor"></div>
-                    <span>Motor Control</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color active"></div>
-                    <span>Active</span>
-                </div>
+            <div id="gpio-pins" class="gpio-pins-list" style="display: none;">
+                <!-- Original pin list (hidden but used for data) -->
             </div>
         </div>
         
@@ -475,7 +537,201 @@
         document.addEventListener('DOMContentLoaded', function() {
             fetchGpioInfo();
             fetchConfiguration();
+            initializePinVisualization();
         });
+        
+        // Initialize pin visualization with the Raspberry Pi Zero image
+        function initializePinVisualization() {
+            const overlayContainer = document.getElementById('gpio-pins-overlay');
+            const tooltip = document.getElementById('pin-tooltip');
+            
+            // Pin positions for Raspberry Pi Zero (percentage values of the image width/height)
+            const pinPositions = {
+                // Left side pins (odd numbers)
+                1: { top: '14%', left: '29%', name: '3.3V Power', modes: ['Power'] },
+                3: { top: '19%', left: '29%', name: 'GPIO 2 (SDA)', modes: ['I2C', 'GPIO'] },
+                5: { top: '24%', left: '29%', name: 'GPIO 3 (SCL)', modes: ['I2C', 'GPIO'] },
+                7: { top: '29%', left: '29%', name: 'GPIO 4 (GPCLK0)', modes: ['GPIO'] },
+                9: { top: '34%', left: '29%', name: 'Ground', modes: ['Ground'] },
+                11: { top: '39%', left: '29%', name: 'GPIO 17', modes: ['GPIO'] },
+                13: { top: '44%', left: '29%', name: 'GPIO 27', modes: ['GPIO'] },
+                15: { top: '49%', left: '29%', name: 'GPIO 22', modes: ['GPIO'] },
+                17: { top: '54%', left: '29%', name: '3.3V Power', modes: ['Power'] },
+                19: { top: '59%', left: '29%', name: 'GPIO 10 (MOSI)', modes: ['SPI', 'GPIO'] },
+                21: { top: '64%', left: '29%', name: 'GPIO 9 (MISO)', modes: ['SPI', 'GPIO'] },
+                23: { top: '69%', left: '29%', name: 'GPIO 11 (SCLK)', modes: ['SPI', 'GPIO'] },
+                25: { top: '74%', left: '29%', name: 'Ground', modes: ['Ground'] },
+                27: { top: '79%', left: '29%', name: 'GPIO 0 (ID_SD)', modes: ['ID EEPROM'] },
+                29: { top: '84%', left: '29%', name: 'GPIO 5', modes: ['GPIO'] },
+                31: { top: '89%', left: '29%', name: 'GPIO 6', modes: ['GPIO'] },
+                33: { top: '94%', left: '29%', name: 'GPIO 13 (PWM1)', modes: ['PWM', 'GPIO'] },
+                35: { top: '99%', left: '29%', name: 'GPIO 19 (MISO)', modes: ['SPI', 'GPIO'] },
+                37: { top: '104%', left: '29%', name: 'GPIO 26', modes: ['GPIO'] },
+                39: { top: '109%', left: '29%', name: 'Ground', modes: ['Ground'] },
+                
+                // Right side pins (even numbers)
+                2: { top: '14%', left: '71%', name: '5V Power', modes: ['Power'] },
+                4: { top: '19%', left: '71%', name: '5V Power', modes: ['Power'] },
+                6: { top: '24%', left: '71%', name: 'Ground', modes: ['Ground'] },
+                8: { top: '29%', left: '71%', name: 'GPIO 14 (TXD)', modes: ['UART', 'GPIO'] },
+                10: { top: '34%', left: '71%', name: 'GPIO 15 (RXD)', modes: ['UART', 'GPIO'] },
+                12: { top: '39%', left: '71%', name: 'GPIO 18 (PWM0)', modes: ['PWM', 'GPIO'] },
+                14: { top: '44%', left: '71%', name: 'Ground', modes: ['Ground'] },
+                16: { top: '49%', left: '71%', name: 'GPIO 23', modes: ['GPIO'] },
+                18: { top: '54%', left: '71%', name: 'GPIO 24', modes: ['GPIO'] },
+                20: { top: '59%', left: '71%', name: 'Ground', modes: ['Ground'] },
+                22: { top: '64%', left: '71%', name: 'GPIO 25', modes: ['GPIO'] },
+                24: { top: '69%', left: '71%', name: 'GPIO 8 (CE0)', modes: ['SPI', 'GPIO'] },
+                26: { top: '74%', left: '71%', name: 'GPIO 7 (CE1)', modes: ['SPI', 'GPIO'] },
+                28: { top: '79%', left: '71%', name: 'GPIO 1 (ID_SC)', modes: ['ID EEPROM'] },
+                30: { top: '84%', left: '71%', name: 'Ground', modes: ['Ground'] },
+                32: { top: '89%', left: '71%', name: 'GPIO 12 (PWM0)', modes: ['PWM', 'GPIO'] },
+                34: { top: '94%', left: '71%', name: 'Ground', modes: ['Ground'] },
+                36: { top: '99%', left: '71%', name: 'GPIO 16', modes: ['GPIO'] },
+                38: { top: '104%', left: '71%', name: 'GPIO 20 (MOSI)', modes: ['SPI', 'GPIO'] },
+                40: { top: '109%', left: '71%', name: 'GPIO 21 (SCLK)', modes: ['SPI', 'GPIO'] }
+            };
+            
+            // BCM to Physical pin mapping
+            const bcmToPhysical = {
+                2: 3,
+                3: 5,
+                4: 7,
+                17: 11,
+                27: 13,
+                22: 15,
+                10: 19,
+                9: 21,
+                11: 23,
+                0: 27,
+                5: 29,
+                6: 31,
+                13: 33,
+                19: 35,
+                26: 37,
+                14: 8,
+                15: 10,
+                18: 12,
+                23: 16,
+                24: 18,
+                25: 22,
+                8: 24,
+                7: 26,
+                1: 28,
+                12: 32,
+                16: 36,
+                20: 38,
+                21: 40
+            };
+            
+            // Physical to BCM pin mapping (reverse of above)
+            const physicalToBcm = {};
+            for (const bcm in bcmToPhysical) {
+                physicalToBcm[bcmToPhysical[bcm]] = parseInt(bcm);
+            }
+            
+            // Create pins and add them to the overlay
+            Object.keys(pinPositions).forEach(pinNumber => {
+                const pin = pinPositions[pinNumber];
+                const pinDiv = document.createElement('div');
+                pinDiv.className = 'pin-overlay';
+                pinDiv.dataset.pin = pinNumber;
+                pinDiv.dataset.name = pin.name;
+                
+                // Set the physical position on the image
+                pinDiv.style.top = pin.top;
+                pinDiv.style.left = pin.left;
+                
+                // Add pin number as text
+                pinDiv.textContent = pinNumber;
+                
+                // Get the BCM pin number for GPIO pins
+                const bcmPin = physicalToBcm[parseInt(pinNumber)];
+                if (bcmPin !== undefined) {
+                    pinDiv.dataset.bcm = bcmPin;
+                }
+                
+                // Add hover effects for tooltip
+                pinDiv.addEventListener('mouseenter', function() {
+                    const pinNumber = this.dataset.pin;
+                    const pinName = this.dataset.name;
+                    const pinModes = pinPositions[pinNumber].modes.join(', ');
+                    
+                    let tooltipContent = `
+                        <div><strong>Pin ${pinNumber}</strong></div>
+                        <div>${pinName}</div>
+                        <div>Modes: ${pinModes}</div>
+                    `;
+                    
+                    // Add BCM pin number for GPIO pins
+                    if (bcmPin !== undefined) {
+                        tooltipContent += `<div>BCM: ${bcmPin}</div>`;
+                    }
+                    
+                    tooltip.innerHTML = tooltipContent;
+                    
+                    // Position tooltip near the pin
+                    const pinRect = this.getBoundingClientRect();
+                    const overlayRect = overlayContainer.getBoundingClientRect();
+                    
+                    // Position tooltip above the pin
+                    tooltip.style.top = (pinRect.top - overlayRect.top - tooltip.offsetHeight - 10) + 'px';
+                    tooltip.style.left = (pinRect.left - overlayRect.left - tooltip.offsetWidth / 2 + pinRect.width / 2) + 'px';
+                    tooltip.classList.add('visible');
+                });
+                
+                pinDiv.addEventListener('mouseleave', function() {
+                    tooltip.classList.remove('visible');
+                });
+                
+                // Make GPIO pins clickable for selection
+                if (pin.modes.includes('GPIO')) {
+                    pinDiv.style.cursor = 'pointer';
+                    pinDiv.addEventListener('click', function() {
+                        // Get the BCM pin number
+                        if (bcmPin !== undefined) {
+                            selectPin(bcmPin, parseInt(pinNumber));
+                        }
+                    });
+                } else {
+                    // Non-GPIO pins get a different style
+                    pinDiv.style.backgroundColor = '#95a5a6';
+                }
+                
+                overlayContainer.appendChild(pinDiv);
+            });
+        }
+        
+        // Function to select a pin when configuring motors
+        function selectPin(bcmPin, physicalPin) {
+            if (!currentEditingMotor) {
+                showStatusMessage('Please open the pin edit modal first', false);
+                return;
+            }
+            
+            // Determine which pin selection is active (step or direction)
+            const stepSelect = document.getElementById('step-pin-select');
+            const dirSelect = document.getElementById('dir-pin-select');
+            
+            // Check if pin is available
+            const pinOptions = Array.from(stepSelect.options).map(opt => parseInt(opt.value));
+            if (!pinOptions.includes(bcmPin)) {
+                showStatusMessage(`Pin GPIO ${bcmPin} is not available for use`, false);
+                return;
+            }
+            
+            // Set value on the appropriate select field based on which was last focused
+            // Default to step pin if nothing is focused
+            let targetSelect = document.activeElement;
+            if (targetSelect !== stepSelect && targetSelect !== dirSelect) {
+                targetSelect = stepSelect;
+            }
+            
+            // Set the value
+            targetSelect.value = bcmPin;
+            
+            showStatusMessage(`Selected GPIO ${bcmPin} (Physical pin ${physicalPin})`, true);
+        }
         
         // Fetch GPIO information from the server
         function fetchGpioInfo() {
@@ -533,6 +789,47 @@
         
         // Create and update GPIO pin visualization
         function updateGpioPinVisualization(pins) {
+            // Skip if pins data is not available
+            if (!pins) return;
+            
+            // Update the pin visualization
+            const pinOverlays = document.querySelectorAll('.pin-overlay');
+            
+            // Reset all pins to inactive state
+            pinOverlays.forEach(pinOverlay => {
+                // Get the physical pin number
+                const physicalPin = parseInt(pinOverlay.dataset.pin);
+                
+                // Get the BCM pin number (if it's a GPIO pin)
+                const bcmPin = pinOverlay.dataset.bcm ? parseInt(pinOverlay.dataset.bcm) : null;
+                
+                // Reset the pin class to default
+                pinOverlay.className = 'pin-overlay';
+                
+                // Non-GPIO pins have a specific color
+                if (!pinOverlay.dataset.name.includes('GPIO')) {
+                    pinOverlay.style.backgroundColor = '#95a5a6';
+                } else {
+                    pinOverlay.style.backgroundColor = '';
+                }
+                
+                // Find matching pin in the pins data
+                if (bcmPin !== null) {
+                    const matchingPin = pins.find(p => parseInt(p.bcm_pin) === bcmPin);
+                    
+                    if (matchingPin) {
+                        // Update pin status based on active and motor pin status
+                        if (matchingPin.active && matchingPin.is_motor_pin) {
+                            pinOverlay.classList.add('motor-pin');
+                        }
+                        if (matchingPin.active) {
+                            pinOverlay.classList.add('active');
+                        }
+                    }
+                }
+            });
+            
+            // Update the hidden pin list (keep it for compatibility)
             const gpioContainer = document.getElementById('gpio-pins');
             gpioContainer.innerHTML = '';
             

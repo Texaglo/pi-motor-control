@@ -182,12 +182,12 @@
         }
         .pin-overlay {
             position: absolute;
-            width: 24px;
-            height: 24px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background-color: #bdc3c7;
             color: white;
-            font-size: 10px;
+            font-size: 8px;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -548,48 +548,48 @@
             // Pin positions for Raspberry Pi Zero (percentage values of the image width/height)
             const pinPositions = {
                 // Left side pins (odd numbers)
-                1: { top: '14%', left: '29%', name: '3.3V Power', modes: ['Power'] },
-                3: { top: '19%', left: '29%', name: 'GPIO 2 (SDA)', modes: ['I2C', 'GPIO'] },
-                5: { top: '24%', left: '29%', name: 'GPIO 3 (SCL)', modes: ['I2C', 'GPIO'] },
-                7: { top: '29%', left: '29%', name: 'GPIO 4 (GPCLK0)', modes: ['GPIO'] },
-                9: { top: '34%', left: '29%', name: 'Ground', modes: ['Ground'] },
-                11: { top: '39%', left: '29%', name: 'GPIO 17', modes: ['GPIO'] },
-                13: { top: '44%', left: '29%', name: 'GPIO 27', modes: ['GPIO'] },
-                15: { top: '49%', left: '29%', name: 'GPIO 22', modes: ['GPIO'] },
-                17: { top: '54%', left: '29%', name: '3.3V Power', modes: ['Power'] },
-                19: { top: '59%', left: '29%', name: 'GPIO 10 (MOSI)', modes: ['SPI', 'GPIO'] },
-                21: { top: '64%', left: '29%', name: 'GPIO 9 (MISO)', modes: ['SPI', 'GPIO'] },
-                23: { top: '69%', left: '29%', name: 'GPIO 11 (SCLK)', modes: ['SPI', 'GPIO'] },
-                25: { top: '74%', left: '29%', name: 'Ground', modes: ['Ground'] },
-                27: { top: '79%', left: '29%', name: 'GPIO 0 (ID_SD)', modes: ['ID EEPROM'] },
-                29: { top: '84%', left: '29%', name: 'GPIO 5', modes: ['GPIO'] },
-                31: { top: '89%', left: '29%', name: 'GPIO 6', modes: ['GPIO'] },
-                33: { top: '94%', left: '29%', name: 'GPIO 13 (PWM1)', modes: ['PWM', 'GPIO'] },
-                35: { top: '99%', left: '29%', name: 'GPIO 19 (MISO)', modes: ['SPI', 'GPIO'] },
-                37: { top: '104%', left: '29%', name: 'GPIO 26', modes: ['GPIO'] },
-                39: { top: '109%', left: '29%', name: 'Ground', modes: ['Ground'] },
+                1: { top: '26%', left: '41%', name: '3.3V Power', modes: ['Power'] },
+                3: { top: '26%', left: '44%', name: 'GPIO 2 (SDA)', modes: ['I2C', 'GPIO'] },
+                5: { top: '26%', left: '47%', name: 'GPIO 3 (SCL)', modes: ['I2C', 'GPIO'] },
+                7: { top: '26%', left: '50%', name: 'GPIO 4 (GPCLK0)', modes: ['GPIO'] },
+                9: { top: '26%', left: '53%', name: 'Ground', modes: ['Ground'] },
+                11: { top: '26%', left: '56%', name: 'GPIO 17', modes: ['GPIO'] },
+                13: { top: '26%', left: '59%', name: 'GPIO 27', modes: ['GPIO'] },
+                15: { top: '26%', left: '62%', name: 'GPIO 22', modes: ['GPIO'] },
+                17: { top: '26%', left: '65%', name: '3.3V Power', modes: ['Power'] },
+                19: { top: '26%', left: '68%', name: 'GPIO 10 (MOSI)', modes: ['SPI', 'GPIO'] },
+                21: { top: '26%', left: '71%', name: 'GPIO 9 (MISO)', modes: ['SPI', 'GPIO'] },
+                23: { top: '26%', left: '74%', name: 'GPIO 11 (SCLK)', modes: ['SPI', 'GPIO'] },
+                25: { top: '26%', left: '77%', name: 'Ground', modes: ['Ground'] },
+                27: { top: '62%', left: '23%', name: 'GPIO 0 (ID_SD)', modes: ['ID EEPROM'] },
+                29: { top: '71%', left: '23%', name: 'GPIO 5', modes: ['GPIO'] },
+                31: { top: '80%', left: '23%', name: 'GPIO 6', modes: ['GPIO'] },
+                33: { top: '89%', left: '23%', name: 'GPIO 13 (PWM1)', modes: ['PWM', 'GPIO'] },
+                35: { top: '98%', left: '36%', name: 'GPIO 19 (MISO)', modes: ['SPI', 'GPIO'] },
+                37: { top: '98%', left: '41%', name: 'GPIO 26', modes: ['GPIO'] },
+                39: { top: '98%', left: '46%', name: 'Ground', modes: ['Ground'] },
                 
                 // Right side pins (even numbers)
-                2: { top: '14%', left: '71%', name: '5V Power', modes: ['Power'] },
-                4: { top: '19%', left: '71%', name: '5V Power', modes: ['Power'] },
-                6: { top: '24%', left: '71%', name: 'Ground', modes: ['Ground'] },
-                8: { top: '29%', left: '71%', name: 'GPIO 14 (TXD)', modes: ['UART', 'GPIO'] },
-                10: { top: '34%', left: '71%', name: 'GPIO 15 (RXD)', modes: ['UART', 'GPIO'] },
-                12: { top: '39%', left: '71%', name: 'GPIO 18 (PWM0)', modes: ['PWM', 'GPIO'] },
-                14: { top: '44%', left: '71%', name: 'Ground', modes: ['Ground'] },
-                16: { top: '49%', left: '71%', name: 'GPIO 23', modes: ['GPIO'] },
-                18: { top: '54%', left: '71%', name: 'GPIO 24', modes: ['GPIO'] },
-                20: { top: '59%', left: '71%', name: 'Ground', modes: ['Ground'] },
-                22: { top: '64%', left: '71%', name: 'GPIO 25', modes: ['GPIO'] },
-                24: { top: '69%', left: '71%', name: 'GPIO 8 (CE0)', modes: ['SPI', 'GPIO'] },
-                26: { top: '74%', left: '71%', name: 'GPIO 7 (CE1)', modes: ['SPI', 'GPIO'] },
-                28: { top: '79%', left: '71%', name: 'GPIO 1 (ID_SC)', modes: ['ID EEPROM'] },
-                30: { top: '84%', left: '71%', name: 'Ground', modes: ['Ground'] },
-                32: { top: '89%', left: '71%', name: 'GPIO 12 (PWM0)', modes: ['PWM', 'GPIO'] },
-                34: { top: '94%', left: '71%', name: 'Ground', modes: ['Ground'] },
-                36: { top: '99%', left: '71%', name: 'GPIO 16', modes: ['GPIO'] },
-                38: { top: '104%', left: '71%', name: 'GPIO 20 (MOSI)', modes: ['SPI', 'GPIO'] },
-                40: { top: '109%', left: '71%', name: 'GPIO 21 (SCLK)', modes: ['SPI', 'GPIO'] }
+                2: { top: '18%', left: '41%', name: '5V Power', modes: ['Power'] },
+                4: { top: '18%', left: '44%', name: '5V Power', modes: ['Power'] },
+                6: { top: '18%', left: '47%', name: 'Ground', modes: ['Ground'] },
+                8: { top: '18%', left: '50%', name: 'GPIO 14 (TXD)', modes: ['UART', 'GPIO'] },
+                10: { top: '18%', left: '53%', name: 'GPIO 15 (RXD)', modes: ['UART', 'GPIO'] },
+                12: { top: '18%', left: '56%', name: 'GPIO 18 (PWM0)', modes: ['PWM', 'GPIO'] },
+                14: { top: '18%', left: '59%', name: 'Ground', modes: ['Ground'] },
+                16: { top: '18%', left: '62%', name: 'GPIO 23', modes: ['GPIO'] },
+                18: { top: '18%', left: '65%', name: 'GPIO 24', modes: ['GPIO'] },
+                20: { top: '18%', left: '68%', name: 'Ground', modes: ['Ground'] },
+                22: { top: '18%', left: '71%', name: 'GPIO 25', modes: ['GPIO'] },
+                24: { top: '18%', left: '74%', name: 'GPIO 8 (CE0)', modes: ['SPI', 'GPIO'] },
+                26: { top: '18%', left: '77%', name: 'GPIO 7 (CE1)', modes: ['SPI', 'GPIO'] },
+                28: { top: '62%', left: '77%', name: 'GPIO 1 (ID_SC)', modes: ['ID EEPROM'] },
+                30: { top: '71%', left: '77%', name: 'Ground', modes: ['Ground'] },
+                32: { top: '80%', left: '77%', name: 'GPIO 12 (PWM0)', modes: ['PWM', 'GPIO'] },
+                34: { top: '89%', left: '77%', name: 'Ground', modes: ['Ground'] },
+                36: { top: '98%', left: '64%', name: 'GPIO 16', modes: ['GPIO'] },
+                38: { top: '98%', left: '59%', name: 'GPIO 20 (MOSI)', modes: ['SPI', 'GPIO'] },
+                40: { top: '98%', left: '54%', name: 'GPIO 21 (SCLK)', modes: ['SPI', 'GPIO'] }
             };
             
             // BCM to Physical pin mapping

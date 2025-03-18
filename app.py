@@ -399,40 +399,70 @@ def update_pins():
 def available_pins():
     global motor_config, active_pins
     
-    # Create a mapping of physical pin numbers to BCM pin numbers
-    bcm_to_physical = {
-        2: 3, 3: 5, 4: 7, 17: 11, 27: 13, 22: 15, 10: 19, 9: 21, 11: 23, 5: 29, 
-        6: 31, 13: 33, 19: 35, 26: 37, 14: 8, 15: 10, 18: 12, 23: 16, 24: 18, 
-        25: 22, 8: 24, 7: 26, 12: 32, 16: 36, 20: 38, 21: 40
-    }
+    # Complete mapping of physical pin numbers to pin types and descriptions
+    all_pins = [
+        {'physical_pin': 1, 'type': 'power', 'description': '3.3V Power'},
+        {'physical_pin': 2, 'type': 'power', 'description': '5V Power', 'in_use': True, 'used_by': 'Power'},
+        {'physical_pin': 3, 'type': 'gpio', 'bcm_pin': 2, 'description': 'GPIO 2 (SDA)'},
+        {'physical_pin': 4, 'type': 'power', 'description': '5V Power'},
+        {'physical_pin': 5, 'type': 'gpio', 'bcm_pin': 3, 'description': 'GPIO 3 (SCL)'},
+        {'physical_pin': 6, 'type': 'ground', 'description': 'Ground', 'in_use': True, 'used_by': 'Ground'},
+        {'physical_pin': 7, 'type': 'gpio', 'bcm_pin': 4, 'description': 'GPIO 4 (GPCLK0)'},
+        {'physical_pin': 8, 'type': 'gpio', 'bcm_pin': 14, 'description': 'GPIO 14 (TXD)'},
+        {'physical_pin': 9, 'type': 'ground', 'description': 'Ground'},
+        {'physical_pin': 10, 'type': 'gpio', 'bcm_pin': 15, 'description': 'GPIO 15 (RXD)'},
+        {'physical_pin': 11, 'type': 'gpio', 'bcm_pin': 17, 'description': 'GPIO 17'},
+        {'physical_pin': 12, 'type': 'gpio', 'bcm_pin': 18, 'description': 'GPIO 18 (PCM_CLK)'},
+        {'physical_pin': 13, 'type': 'gpio', 'bcm_pin': 27, 'description': 'GPIO 27'},
+        {'physical_pin': 14, 'type': 'ground', 'description': 'Ground'},
+        {'physical_pin': 15, 'type': 'gpio', 'bcm_pin': 22, 'description': 'GPIO 22'},
+        {'physical_pin': 16, 'type': 'gpio', 'bcm_pin': 23, 'description': 'GPIO 23'},
+        {'physical_pin': 17, 'type': 'power', 'description': '3.3V Power'},
+        {'physical_pin': 18, 'type': 'gpio', 'bcm_pin': 24, 'description': 'GPIO 24'},
+        {'physical_pin': 19, 'type': 'gpio', 'bcm_pin': 10, 'description': 'GPIO 10 (MOSI)'},
+        {'physical_pin': 20, 'type': 'ground', 'description': 'Ground'},
+        {'physical_pin': 21, 'type': 'gpio', 'bcm_pin': 9, 'description': 'GPIO 9 (MISO)'},
+        {'physical_pin': 22, 'type': 'gpio', 'bcm_pin': 25, 'description': 'GPIO 25'},
+        {'physical_pin': 23, 'type': 'gpio', 'bcm_pin': 11, 'description': 'GPIO 11 (SCLK)'},
+        {'physical_pin': 24, 'type': 'gpio', 'bcm_pin': 8, 'description': 'GPIO 8 (CE0)'},
+        {'physical_pin': 25, 'type': 'ground', 'description': 'Ground'},
+        {'physical_pin': 26, 'type': 'gpio', 'bcm_pin': 7, 'description': 'GPIO 7 (CE1)'},
+        {'physical_pin': 27, 'type': 'gpio', 'bcm_pin': 0, 'description': 'GPIO 0 (ID_SD)'},
+        {'physical_pin': 28, 'type': 'gpio', 'bcm_pin': 1, 'description': 'GPIO 1 (ID_SC)'},
+        {'physical_pin': 29, 'type': 'gpio', 'bcm_pin': 5, 'description': 'GPIO 5'},
+        {'physical_pin': 30, 'type': 'ground', 'description': 'Ground'},
+        {'physical_pin': 31, 'type': 'gpio', 'bcm_pin': 6, 'description': 'GPIO 6'},
+        {'physical_pin': 32, 'type': 'gpio', 'bcm_pin': 12, 'description': 'GPIO 12 (PWM0)'},
+        {'physical_pin': 33, 'type': 'gpio', 'bcm_pin': 13, 'description': 'GPIO 13 (PWM1)'},
+        {'physical_pin': 34, 'type': 'ground', 'description': 'Ground'},
+        {'physical_pin': 35, 'type': 'gpio', 'bcm_pin': 19, 'description': 'GPIO 19 (MISO)'},
+        {'physical_pin': 36, 'type': 'gpio', 'bcm_pin': 16, 'description': 'GPIO 16'},
+        {'physical_pin': 37, 'type': 'gpio', 'bcm_pin': 26, 'description': 'GPIO 26'},
+        {'physical_pin': 38, 'type': 'gpio', 'bcm_pin': 20, 'description': 'GPIO 20 (MOSI)'},
+        {'physical_pin': 39, 'type': 'ground', 'description': 'Ground'},
+        {'physical_pin': 40, 'type': 'gpio', 'bcm_pin': 21, 'description': 'GPIO 21 (SCLK)'}
+    ]
     
-    # Get all available BCM pins
-    available_pins = []
-    for pin in range(28):
-        in_use = False
-        used_by = None
-        
-        # Check if pin is used by any motor
-        for motor, pins in motor_config.items():
-            if pin == pins['step_pin']:
-                in_use = True
-                used_by = f"{motor} step"
-                break
-            elif pin == pins['dir_pin']:
-                in_use = True
-                used_by = f"{motor} direction"
-                break
-        
-        available_pins.append({
-            'bcm_pin': pin,
-            'physical_pin': bcm_to_physical.get(pin, 'N/A'),
-            'in_use': in_use,
-            'used_by': used_by
-        })
+    # Mark pins that are in use by motors
+    for pin in all_pins:
+        if pin.get('type') == 'gpio' and not pin.get('in_use'):
+            pin['in_use'] = False
+            pin['used_by'] = None
+            
+            # Check if pin is used by any motor
+            for motor, pins in motor_config.items():
+                if pin.get('bcm_pin') == pins['step_pin']:
+                    pin['in_use'] = True
+                    pin['used_by'] = f"{motor} step"
+                    break
+                elif pin.get('bcm_pin') == pins['dir_pin']:
+                    pin['in_use'] = True
+                    pin['used_by'] = f"{motor} direction"
+                    break
     
     return jsonify({
         'status': 'success',
-        'available_pins': available_pins
+        'available_pins': all_pins
     })
 
 if __name__ == '__main__':

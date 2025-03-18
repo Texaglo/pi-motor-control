@@ -979,35 +979,55 @@
             stepSelect.innerHTML = '';
             dirSelect.innerHTML = '';
             
+            // Sort pins by physical pin number
+            pins.sort((a, b) => a.physical_pin - b.physical_pin);
+            
             // Add options for each available pin
             pins.forEach(pin => {
+                // Create options for each pin type
                 const stepOption = document.createElement('option');
-                stepOption.value = pin.bcm_pin;
-                stepOption.textContent = `GPIO ${pin.bcm_pin} (Physical Pin ${pin.physical_pin})`;
-                
                 const dirOption = document.createElement('option');
-                dirOption.value = pin.bcm_pin;
-                dirOption.textContent = `GPIO ${pin.bcm_pin} (Physical Pin ${pin.physical_pin})`;
                 
-                // If pin is in use by another motor, disable it
-                // But allow current pins of this motor to be selected
-                if (pin.in_use && !pin.used_by.startsWith(currentMotor)) {
-                    stepOption.disabled = true;
-                    dirOption.disabled = true;
-                    stepOption.textContent += ` - In use by ${pin.used_by}`;
-                    dirOption.textContent += ` - In use by ${pin.used_by}`;
+                if (pin.type === 'gpio') {
+                    // GPIO pins can be selected for motors
+                    stepOption.value = pin.bcm_pin;
+                    dirOption.value = pin.bcm_pin;
+                    stepOption.textContent = `Pin ${pin.physical_pin}: ${pin.description}`;
+                    dirOption.textContent = `Pin ${pin.physical_pin}: ${pin.description}`;
+                    
+                    // If pin is in use by another motor, disable it
+                    // But allow current pins of this motor to be selected
+                    if (pin.in_use && !pin.used_by?.startsWith(currentMotor)) {
+                        stepOption.disabled = true;
+                        dirOption.disabled = true;
+                        stepOption.textContent += ` - In use by ${pin.used_by}`;
+                        dirOption.textContent += ` - In use by ${pin.used_by}`;
+                    }
+                    
+                    // Select the current pins for this motor
+                    if (motorConfig[currentMotor] && motorConfig[currentMotor].step_pin === pin.bcm_pin) {
+                        stepOption.selected = true;
+                    }
+                    if (motorConfig[currentMotor] && motorConfig[currentMotor].dir_pin === pin.bcm_pin) {
+                        dirOption.selected = true;
+                    }
+                    
+                    stepSelect.appendChild(stepOption);
+                    dirSelect.appendChild(dirOption);
+                } else {
+                    // Power and ground pins are shown but disabled
+                    const powerOption = document.createElement('option');
+                    powerOption.value = '';
+                    powerOption.disabled = true;
+                    powerOption.textContent = `Pin ${pin.physical_pin}: ${pin.description}`;
+                    if (pin.in_use) {
+                        powerOption.textContent += ` - In use by ${pin.used_by}`;
+                    }
+                    
+                    // Add to both dropdowns
+                    stepSelect.appendChild(powerOption.cloneNode(true));
+                    dirSelect.appendChild(powerOption);
                 }
-                
-                // Select the current pins for this motor
-                if (motorConfig[currentMotor] && motorConfig[currentMotor].step_pin === pin.bcm_pin) {
-                    stepOption.selected = true;
-                }
-                if (motorConfig[currentMotor] && motorConfig[currentMotor].dir_pin === pin.bcm_pin) {
-                    dirOption.selected = true;
-                }
-                
-                stepSelect.appendChild(stepOption);
-                dirSelect.appendChild(dirOption);
             });
         }
         
